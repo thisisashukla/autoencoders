@@ -12,7 +12,13 @@ def test_dense(mnist_input):
     ae.compile(optimizer='adam', loss='binary_crossentropy',
                metrics=['accuracy'])
 
+    weights_before = ae.model.get_weights()
+
     ae.fit(mnist_input, batch_size=10, epochs=1)
 
-    ae.compile_and_fit(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'],
-                       data=mnist_input, batch_size=10, epochs=1)
+    weights_after = ae.model.get_weights()
+
+    assert all([l != 0 for l in ae.model.history.history['loss']])
+    for b, a in zip(weights_before, weights_after):
+        assert (b!=a).any()
+    
