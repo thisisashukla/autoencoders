@@ -1,20 +1,23 @@
-from autoencoder.models import DenseAE
+from autoencoder.models import DenseAE, ConvAE
 import pytest
 import sys
 sys.path.append('../')
 
 
 @pytest.mark.train
-def test_dense(mnist_input):
+def test_dense(mnist_input_flat):
 
-    layers = [10, 5, 10]
-    ae = DenseAE(mnist_input.shape[1], layers, ['relu', 'relu', 'relu'])
-    ae.compile(optimizer='adam', loss='binary_crossentropy',
-               metrics=['accuracy'])
+    layers = [10, 5]
+    activations = ['relu', 'relu']
+    ae = DenseAE(mnist_input_flat.shape[1], layers, activations)
+    ae.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
+
+    assert len(ae.encoder.layers) == len(ae.decoder.layers)
+    assert len(ae.encoder.layers) + len(ae.decoder.layers) == 2*len(layers)
 
     weights_before = ae.model.get_weights()
 
-    ae.fit(mnist_input, batch_size=10, epochs=1)
+    ae.fit(mnist_input_flat, batch_size=10, epochs=1)
 
     weights_after = ae.model.get_weights()
 
@@ -22,3 +25,33 @@ def test_dense(mnist_input):
     for b, a in zip(weights_before, weights_after):
         assert (b!=a).any()
     
+    encoded = ae.encoder.predict(mnist_input)
+    assert encoded.shape == (mnist_input.shape[0], layers[-1])
+    assert ae.decoder.predict(encoded).shape == mnist_input.shape
+
+@pytest.mark.train
+def test_conv(mnist_input_image):
+
+    layers = [10, 5]
+    activations = ['relu', 'relu']
+    kernels = [2, 2]
+    ae = ConvAE(mnist_input_image.shape[1:], layers, activations, kernels)
+    ae.compile(optimizer='adam', loss='binary_crossentropy',
+               metrics=['accuracy'])
+
+    assert len(ae.encoder.layers) == len(ae.decoder.layers)
+    assert len(ae.encoder.layers) + len(ae.decoder.layers) == 2*len(layers)
+
+    weights_before = ae.model.get_weights()
+
+    ae.fit(mnist_input_image, batch_size=10, epochs=1)
+
+    weights_after = ae.model.get_weights()
+
+    assert all([l != 0 for l in ae.model.history.history['loss']])
+    for b, a in zip(weights_before, weights_after):
+        assert (b != a).any()
+
+    encoded = ae.encoder.predict(mnist_input)
+    assert encoded.shape == (mnist_input.shape[0], layers[-1])
+    assert ae.decoder.predict(encoded).shape == mnist_input.shape

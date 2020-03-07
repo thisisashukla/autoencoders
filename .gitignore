@@ -1,1 +1,7 @@
-env/
+.pytest_cache/
+.vscode/
+autoencoder/__pycache__
+tests/__pycache__
+
+dataset/hyperspectral/Indian_pines.mat
+dataset/hyperspectral/ip_gt.mat
