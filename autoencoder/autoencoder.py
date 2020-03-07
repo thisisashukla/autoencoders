@@ -1,9 +1,15 @@
 from abc import ABC, abstractmethod
 from tensorflow.keras import Sequential
 
+class LayerException(Exception):
+    pass
+
 class Autoencoder(ABC):
 
     def __init__(self, input_shape, enc_layers, activations):
+
+        if len(enc_layers)%2 != 0:
+            raise LayerException('Number of layers in the encoder should be even!')
         self.input_shape = input_shape
         self.enc_layers = enc_layers
         self.activations = activations

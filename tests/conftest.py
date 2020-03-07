@@ -22,7 +22,7 @@ def mnist_input_image():
 
     x_train = x_train.astype('float32') / 255.
 
-    x_train = np.expand_dims(x_train, axis = 0)
+    x_train = np.expand_dims(x_train, axis = 3)
 
     return x_train
 

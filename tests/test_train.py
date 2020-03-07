@@ -25,18 +25,18 @@ def test_dense(mnist_input_flat):
     for b, a in zip(weights_before, weights_after):
         assert (b!=a).any()
     
-    encoded = ae.encoder.predict(mnist_input)
-    assert encoded.shape == (mnist_input.shape[0], layers[-1])
-    assert ae.decoder.predict(encoded).shape == mnist_input.shape
+    encoded = ae.encoder.predict(mnist_input_flat)
+    assert encoded.shape == (mnist_input_flat.shape[0], layers[-1])
+    assert ae.decoder.predict(encoded).shape == mnist_input_flat.shape
 
 @pytest.mark.train
 def test_conv(mnist_input_image):
 
-    layers = [10, 5]
+    layers = [16, 8]
     activations = ['relu', 'relu']
-    kernels = [2, 2]
+    kernels = [3, 3]
     ae = ConvAE(mnist_input_image.shape[1:], layers, activations, kernels)
-    ae.compile(optimizer='adam', loss='binary_crossentropy',
+    ae.compile(optimizer='adadelta', loss='binary_crossentropy',
                metrics=['accuracy'])
 
     assert len(ae.encoder.layers) == len(ae.decoder.layers)
@@ -52,6 +52,7 @@ def test_conv(mnist_input_image):
     for b, a in zip(weights_before, weights_after):
         assert (b != a).any()
 
-    encoded = ae.encoder.predict(mnist_input)
-    assert encoded.shape == (mnist_input.shape[0], layers[-1])
-    assert ae.decoder.predict(encoded).shape == mnist_input.shape
+
+    encoded = ae.encoder.predict(mnist_input_image)
+    assert encoded.shape == (mnist_input_image.shape[0], mnist_input_image.shape[1], mnist_input_image.shape[2], layers[-1])
+    assert ae.decoder.predict(encoded).shape == mnist_input_image.shape

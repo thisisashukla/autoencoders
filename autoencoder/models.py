@@ -37,19 +37,18 @@ class ConvAE(Autoencoder):
     def compile(self, optimizer, loss, metrics):
         for i, (width, act, kernel) in enumerate(zip(self.enc_layers, self.activations, self.kernel_sizes)):
             if i == 0:
-                self.encoder.add(Conv2D(filters = width, kernel_size = kernel, activation = act, input_shape = self.input_shape))
+                self.encoder.add(Conv2D(filters = width, kernel_size = kernel, activation = act, padding = 'same', input_shape = self.input_shape))
             else:
-                self.encoder.add(Conv2D(filters = width, kernel_size = kernel, activation = act))
+                self.encoder.add(Conv2D(filters = width, kernel_size = kernel, activation = act, padding = 'same'))
 
         for i, (width, act, kernel) in enumerate(zip(self.enc_layers[::-1][1:], 
                                                      self.activations[::-1][1:], self.kernel_sizes[::-1][1:])):
-            print(width, act, kernel, self.enc_layers[-1])            
             if i == 0:
-                self.decoder.add(Conv2D(filters = width, kernel_size = kernel, activation = act, input_shape = self.decoder_input_shape))
+                self.decoder.add(Conv2D(filters = width, kernel_size = kernel, activation = act, padding = 'same', input_shape = self.decoder_input_shape))
             else:
-                self.decoder.add(Conv2D(filters = width, kernel_size = kernel, activation = act))
+                self.decoder.add(Conv2D(filters = width, kernel_size = kernel, activation = act, padding = 'same'))
 
-        self.decoder.add(Conv2D(filters = self.input_shape[-1], kernel_size = self.kernel_sizes[0], activation = 'softmax'))        
+        self.decoder.add(Conv2D(filters = self.input_shape[-1], kernel_size = self.kernel_sizes[0], activation = 'sigmoid', padding = 'same'))        
         self.model.add(self.encoder)
         self.model.add(self.decoder)
 
